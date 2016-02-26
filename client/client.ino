@@ -22,7 +22,7 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(service.getKey());
-  delay(3000);
+  Serial.println(service.getKey("34ba12987ffa"));
+  delay(5000);
 }
 

@@ -1,5 +1,5 @@
 /*
-  Service.h - Library for consuming API.
+  Service.h - Library for consuming Web Services API's.
   Created by Gustavo Sobral, Febuary 26, 2016.
   Released into the public domain.
 */
@@ -17,9 +17,9 @@ class Service
   public:
     Service();
     void init(byte * mac, IPAddress server, IPAddress ip);
-    String getKey();
+    String getKey(String key);
   private:
-    EthernetClient client;
+    EthernetClient _client;
     IPAddress _server;
 };
 
