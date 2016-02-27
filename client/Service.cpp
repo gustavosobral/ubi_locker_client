@@ -1,7 +1,6 @@
 /*
   Service.cpp - Library for consuming Web Services API's.
   Created by Gustavo Sobral, Febuary 26, 2016.
-  Released into the public domain.
 */
 
 #include "Arduino.h"
@@ -39,11 +38,13 @@ String Service::getKey(String key)
     if (_client.available()) {
       char c = _client.read();
       inputString += c;
-  
+
+      // Skips the HTTP Header
       if(inputString == "\r\n") {
         inputString = "";
         stringComplete = true;
       }
+      // Clear after each new line
       if(!stringComplete && c == '\n') {
         inputString = "";
       }

@@ -1,7 +1,6 @@
 /*
   Service.h - Library for consuming Web Services API's.
   Created by Gustavo Sobral, Febuary 26, 2016.
-  Released into the public domain.
 */
 
 #ifndef Service_h
