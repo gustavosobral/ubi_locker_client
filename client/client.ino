@@ -1,21 +1,27 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <Ethernet.h>
+#include <ArduinoJson.h>
+
 #include "Service.h"
 
 // RF-ID
 #define SS_PIN 9
 #define RST_PIN 8
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance.
+MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
 // Ethernet
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress server(192,168,25,42);
 IPAddress ip(192, 168, 25, 150); // Set the static IP address to use if the DHCP fails to assign
 
+// JSON
+StaticJsonBuffer<200> jsonBuffer;
+
 int denied = 3;
 int allowed = 4;
-String card = "";
+String json = "";
+String keyId = "";
 boolean enabled = false;
 
 Service service;
@@ -50,21 +56,32 @@ void loop() {
   }
 
   for (byte i = 0; i < mfrc522.uid.size; i++) {
-    card += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
-    card += String(mfrc522.uid.uidByte[i], HEX);
+    keyId += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
+    keyId += String(mfrc522.uid.uidByte[i], HEX);
   }
   mfrc522.PICC_HaltA(); // Stop reading
   
-  Serial.println(service.getKey(card));
-  if(enabled) {
-    digitalWrite(allowed, HIGH);
-    delay(1000);
-    digitalWrite(allowed, LOW);
+  json = service.getKey(keyId);
+  JsonObject& root = jsonBuffer.parseObject(json);
+  String response = root["key"];
+  if(response.length() != 0){
+    JsonObject& key = jsonBuffer.parseObject(response);
+    enabled = key["enabled"];
+    if(enabled) {
+      digitalWrite(allowed, HIGH);
+      delay(1000);
+      digitalWrite(allowed, LOW);
+    } else {
+      digitalWrite(denied, HIGH);
+      delay(1000);
+      digitalWrite(denied, LOW);
+    }
   } else {
-    digitalWrite(denied, HIGH);
-    delay(1000);
-    digitalWrite(denied, LOW);
+    String erroMsg = root["error"];
+    Serial.println("[ERRO]: " + erroMsg);
   }
-  card = "";
+  
+  jsonBuffer = StaticJsonBuffer<200>();
+  keyId = "";
 }
 
