@@ -58,52 +58,77 @@ void setup() {
 }
 
 void loop() {
-  // Look for new cards
-  if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    delay(200);
-    return;
-  }
+  key = keypad.getKey();
 
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) {
-    delay(200);
-    return;
-  }
-
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    keyId += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
-    keyId += String(mfrc522.uid.uidByte[i], HEX);
-  }
-  mfrc522.PICC_HaltA(); // Stop reading
-  
-  json = service.getKey(keyId);
-  JsonObject& root = jsonBuffer.parseObject(json);
-  String response = root["key"];
-  if(response.length() != 0){
-    JsonObject& key = jsonBuffer.parseObject(response);
-    enabled = key["enabled"];
-    if(enabled) {
-      digitalWrite(allowed, HIGH);
-      delay(1000);
-      digitalWrite(allowed, LOW);
-    } else {
-      digitalWrite(denied, HIGH);
-      delay(1000);
-      digitalWrite(denied, LOW);
+  if (key != NO_KEY){
+    switch(key){
+      case '1': requestAccessRF(); break;
+      case '2': requestAccessPWD(); break;
+      case '8': registerStudent(); break;
+      case '9': updateRF();
     }
-  } else {
-    String erroMsg = root["error"];
-    Serial.println("[ERRO]: " + erroMsg);
   }
-  
-  jsonBuffer = StaticJsonBuffer<200>();
-  keyId = "";
 }
 
-void requestAccessRF() {}
+void requestAccessRF() {
+  Serial.println("[LOG]: requestAccessRF");
+  
+  while(true){
+    delay(200);
+    
+    if(keypad.getKey() != NO_KEY)
+      break;
 
-void requestAccessPWD() {}
+    // Look for new cards
+    if ( ! mfrc522.PICC_IsNewCardPresent()) {
+      continue;
+    }
 
-void registerStudent() {}
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial()) {
+      continue;
+    }
 
-void updateRF() {}
+    for (byte i = 0; i < mfrc522.uid.size; i++) {
+      keyId += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
+      keyId += String(mfrc522.uid.uidByte[i], HEX);
+    }
+    mfrc522.PICC_HaltA(); // Stop reading
+    
+    json = service.getKey(keyId);
+    JsonObject& root = jsonBuffer.parseObject(json);
+    String response = root["key"];
+    if(response.length() != 0){
+      JsonObject& key = jsonBuffer.parseObject(response);
+      enabled = key["enabled"];
+      if(enabled) {
+        digitalWrite(allowed, HIGH);
+        delay(1000);
+        digitalWrite(allowed, LOW);
+      } else {
+        digitalWrite(denied, HIGH);
+        delay(1000);
+        digitalWrite(denied, LOW);
+      }
+    } else {
+      String erroMsg = root["error"];
+      Serial.println("[ERRO]: " + erroMsg);
+    }
+    
+    jsonBuffer = StaticJsonBuffer<200>();
+    keyId = "";
+    break;
+  }
+}
+
+void requestAccessPWD() {
+  Serial.println("[LOG]: requestAccessPWD");
+}
+
+void registerStudent() {
+  Serial.println("[LOG]: registerStudent");
+}
+
+void updateRF() {
+  Serial.println("[LOG]: updateRF");
+}
