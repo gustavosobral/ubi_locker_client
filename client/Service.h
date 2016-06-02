@@ -20,6 +20,7 @@ class Service
   private:
     EthernetClient _client;
     IPAddress _server;
+    String handleResponse();
 };
 
 #endif

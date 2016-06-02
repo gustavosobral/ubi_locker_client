@@ -18,9 +18,6 @@ void Service::init(byte * mac, IPAddress server, IPAddress ip)
 
 String Service::getRFAccess(String key)
 {
-  boolean stringComplete = false;
-  String inputString = "";
-
   // if you get a connection, report back via serial:
   if (_client.connect(_server, 80)) {
     // Make a HTTP request:
@@ -34,7 +31,14 @@ String Service::getRFAccess(String key)
   } else {
     // if you didn't get a connection to the server:
      Serial.println("connection failed");
+     return "";
   }
+  return handleResponse();
+}
+
+String Service::handleResponse() {
+  boolean stringComplete = false;
+  String inputString = "";
   
   while(true) {
     if (_client.available()) {
@@ -58,6 +62,7 @@ String Service::getRFAccess(String key)
       break;
     }
   }
+  
   inputString = inputString.substring(inputString.indexOf("{"), inputString.lastIndexOf("}")+1);
   return inputString;
 }
