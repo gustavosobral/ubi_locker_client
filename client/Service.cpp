@@ -16,17 +16,19 @@ void Service::init(byte * mac, IPAddress server, IPAddress ip)
   _server = server;
 }
 
-String Service::getKey(String key)
+String Service::getRFAccess(String key)
 {
   boolean stringComplete = false;
   String inputString = "";
 
   // if you get a connection, report back via serial:
-  if (_client.connect(_server, 8000)) {
+  if (_client.connect(_server, 80)) {
     // Make a HTTP request:
-    _client.println("GET /api/keys/" + key + " HTTP/1.1");
-    _client.println("Host: 192.168.25.64:8000");
+    _client.println("GET /api/access/get-by-rfid/?rfid=" + key + "&locker_id=1 HTTP/1.1");
+    _client.println("Host: 162.243.249.102");
     _client.println("User-Agent: arduino-ethernet");
+    _client.println("Accept: application/json");
+    _client.println("Content-Type: application/json");
     _client.println("Connection: close");
     _client.println();
   } else {
@@ -56,7 +58,7 @@ String Service::getKey(String key)
       break;
     }
   }
-
+  inputString = inputString.substring(inputString.indexOf("{"), inputString.lastIndexOf("}")+1);
   return inputString;
 }
 

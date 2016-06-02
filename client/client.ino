@@ -13,7 +13,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
 // Ethernet
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress server(192,168,25,64);
+IPAddress server(162,243,249,102);
 IPAddress ip(192, 168, 25, 150); // Set the static IP address to use if the DHCP fails to assign
 
 const byte ROWS = 4; //four rows
@@ -97,12 +97,10 @@ void requestAccessRF() {
     }
     mfrc522.PICC_HaltA(); // Stop reading
     
-    json = service.getKey(keyId);
+    json = service.getRFAccess(keyId);
     JsonObject& root = jsonBuffer.parseObject(json);
-    String response = root["key"];
-    if(response.length() != 0) {
-      JsonObject& key = jsonBuffer.parseObject(response);
-      enabled = key["enabled"];
+    String enabled = root["access"];
+    if(enabled.length() != 0) {
       if(enabled) {
         digitalWrite(allowed, HIGH);
         delay(1000);
@@ -111,9 +109,13 @@ void requestAccessRF() {
         digitalWrite(denied, HIGH);
         delay(1000);
         digitalWrite(denied, LOW);
+        Serial.println("[LOG]: Access denied");
       }
     } else {
-      String erroMsg = root["error"];
+      digitalWrite(denied, HIGH);
+      delay(1000);
+      digitalWrite(denied, LOW);
+      String erroMsg = root["detail"];
       Serial.println("[ERRO]: " + erroMsg);
     }
     

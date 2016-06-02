@@ -16,7 +16,7 @@ class Service
   public:
     Service();
     void init(byte * mac, IPAddress server, IPAddress ip);
-    String getKey(String key);
+    String getRFAccess(String key);
   private:
     EthernetClient _client;
     IPAddress _server;
