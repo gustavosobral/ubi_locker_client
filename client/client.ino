@@ -15,6 +15,9 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress server(192,168,25,42);
 IPAddress ip(192, 168, 25, 150); // Set the static IP address to use if the DHCP fails to assign
 
+// KeyBoard
+const int analogInPin = A0;
+
 // JSON
 StaticJsonBuffer<200> jsonBuffer;
 
@@ -85,3 +88,10 @@ void loop() {
   keyId = "";
 }
 
+void requestAccessRF() {}
+
+void requestAccessPWD() {}
+
+void registerStudent() {}
+
+void updateRF() {}
