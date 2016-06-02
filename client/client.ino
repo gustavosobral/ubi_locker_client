@@ -123,6 +123,32 @@ void requestAccessRF() {
 
 void requestAccessPWD() {
   Serial.println("[LOG]: requestAccessPWD");
+  String login = "";
+  String password = "";
+  
+  while(true){
+    key = keypad.getKey();
+    
+    if(key != NO_KEY) {
+      if(key == '#')
+        break;
+
+      if(login.length() != 8) {
+        login += key;
+        continue;
+      }
+
+      if(password.length() != 6) {
+        password += key;
+        continue;
+      } else {
+        break;
+      }
+    }
+  }
+
+  Serial.println("[LOG]: login = " + login);
+  Serial.println("[LOG]: password = " + password);
 }
 
 void registerStudent() {
