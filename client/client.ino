@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include <Keypad.h>
 #include <MFRC522.h>
 #include <Ethernet.h>
 #include <ArduinoJson.h>
@@ -12,11 +13,21 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
 // Ethernet
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress server(192,168,25,42);
+IPAddress server(192,168,25,64);
 IPAddress ip(192, 168, 25, 150); // Set the static IP address to use if the DHCP fails to assign
 
-// KeyBoard
-const int analogInPin = A0;
+const byte ROWS = 4; //four rows
+const byte COLS = 3; //three columns
+char keys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
+};
+byte rowPins[ROWS] = {A0, A1, A3, A4}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {A5, 6, 7}; //connect to the column pinouts of the keypad
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+char key;
 
 // JSON
 StaticJsonBuffer<200> jsonBuffer;
@@ -42,6 +53,7 @@ void setup() {
   service.init(mac, server, ip);
   pinMode(allowed, OUTPUT);
   pinMode(denied, OUTPUT);
+
   Serial.println(" Ok!");
 }
 

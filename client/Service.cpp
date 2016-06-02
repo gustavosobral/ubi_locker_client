@@ -25,7 +25,7 @@ String Service::getKey(String key)
   if (_client.connect(_server, 8000)) {
     // Make a HTTP request:
     _client.println("GET /api/keys/" + key + " HTTP/1.1");
-    _client.println("Host: 192.168.25.42:8000");
+    _client.println("Host: 192.168.25.64:8000");
     _client.println("User-Agent: arduino-ethernet");
     _client.println("Connection: close");
     _client.println();
