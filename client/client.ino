@@ -2,7 +2,6 @@
 #include <Keypad.h>
 #include <MFRC522.h>
 #include <Ethernet.h>
-#include <ArduinoJson.h>
 
 #include "Service.h"
 
@@ -28,9 +27,6 @@ byte rowPins[ROWS] = {A0, A1, A3, A4}; //connect to the row pinouts of the keypa
 byte colPins[COLS] = {A5, 6, 7}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 char key;
-
-// JSON
-StaticJsonBuffer<200> jsonBuffer;
 
 int denied = 3;
 int allowed = 4;
@@ -70,16 +66,39 @@ void loop() {
   }
 }
 
+void access(String json){
+  if(json.indexOf("access") != -1) {
+    String enabled = json.substring(json.indexOf(":")+1, json.indexOf(","));
+    if(enabled.equals("1")) {
+      digitalWrite(allowed, HIGH);
+      delay(1000);
+      digitalWrite(allowed, LOW);
+    } else {
+      digitalWrite(denied, HIGH);
+      delay(1000);
+      digitalWrite(denied, LOW);
+      Serial.println("[LOG]: Access denied");
+    }
+  } else {
+    digitalWrite(denied, HIGH);
+    delay(1000);
+    digitalWrite(denied, LOW);
+    Serial.println("[ERRO]: No access on recieved string");
+  }
+}
+
 void requestAccessRF() {
   Serial.println("[LOG]: requestAccessRF");
   keyId = "";
-  jsonBuffer = StaticJsonBuffer<200>();
     
   while(true) {
     delay(200);
     
-    if(keypad.getKey() != NO_KEY)
+    if(keypad.getKey() != NO_KEY){
+      access("Aborted!");
       break;
+    }
+      
 
     // Look for new cards
     if ( ! mfrc522.PICC_IsNewCardPresent()) {
@@ -96,29 +115,10 @@ void requestAccessRF() {
       keyId += String(mfrc522.uid.uidByte[i], HEX);
     }
     mfrc522.PICC_HaltA(); // Stop reading
-    
+
+    Serial.println("[LOG]: keyId = " + keyId);
     json = service.getRFAccess(keyId);
-    JsonObject& root = jsonBuffer.parseObject(json);
-    String enabled = root["access"];
-    if(enabled.length() != 0) {
-      if(enabled) {
-        digitalWrite(allowed, HIGH);
-        delay(1000);
-        digitalWrite(allowed, LOW);
-      } else {
-        digitalWrite(denied, HIGH);
-        delay(1000);
-        digitalWrite(denied, LOW);
-        Serial.println("[LOG]: Access denied");
-      }
-    } else {
-      digitalWrite(denied, HIGH);
-      delay(1000);
-      digitalWrite(denied, LOW);
-      String erroMsg = root["detail"];
-      Serial.println("[ERRO]: " + erroMsg);
-    }
-    
+    access(json);    
     break;
   }
 }
@@ -140,7 +140,7 @@ void requestAccessPWD() {
         continue;
       }
 
-      if(password.length() != 6) {
+      if(password.length() != 4) {
         password += key;
         continue;
       } else {
@@ -148,9 +148,16 @@ void requestAccessPWD() {
       }
     }
   }
-
+  
   Serial.println("[LOG]: login = " + login);
   Serial.println("[LOG]: password = " + password);
+  
+  if(login.length() != 0 && password.length() != 0) {
+    json = service.getPWDAccess(login, password);
+    access(json);
+  } else {
+    access("Aborted!");
+  }
 }
 
 void registerStudent() {
