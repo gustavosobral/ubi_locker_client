@@ -90,7 +90,7 @@ void access(String json){
 void requestAccessRF() {
   Serial.println("[LOG]: requestAccessRF");
   keyId = "";
-    
+
   while(true) {
     delay(200);
     
@@ -137,11 +137,13 @@ void requestAccessPWD() {
 
       if(login.length() != 8) {
         login += key;
+        tone(2, 2062, 6);
         continue;
       }
 
       if(password.length() != 4) {
         password += key;
+        tone(2, 2062, 6);
         continue;
       } else {
         break;
