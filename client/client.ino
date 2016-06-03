@@ -66,7 +66,7 @@ void loop() {
   }
 }
 
-void access(String json){
+void access(String json) {
   if(json.indexOf("access") != -1) {
     String enabled = json.substring(json.indexOf(":")+1, json.indexOf(","));
     if(enabled.equals("1")) {
@@ -87,8 +87,19 @@ void access(String json){
   }
 }
 
+String extractToken(String json) {
+  json = json.substring(json.indexOf(":")+2, json.indexOf("}")-1);
+  if(json.equals("Not found.")) {
+    return "";
+  } else {
+    return json;
+  }
+}
+
 void requestAccessRF() {
   Serial.println("[LOG]: requestAccessRF");
+  tone(2, 2062, 6);
+  
   keyId = "";
 
   while(true) {
@@ -125,6 +136,8 @@ void requestAccessRF() {
 
 void requestAccessPWD() {
   Serial.println("[LOG]: requestAccessPWD");
+  tone(2, 2062, 6);
+  
   String login = "";
   String password = "";
   
@@ -164,6 +177,8 @@ void requestAccessPWD() {
 
 void registerStudent() {
   Serial.println("[LOG]: registerStudent");
+  tone(2, 2062, 6);
+  
   String login = "";
   String password = "";
   String adminKeyId = "";
@@ -192,23 +207,35 @@ void registerStudent() {
         adminKeyId += String(mfrc522.uid.uidByte[i], HEX);
       }
       mfrc522.PICC_HaltA(); // Stop reading
-      // TODO: Consult service to check for the authorization
-      token = "a58d2fs";
-      continue;
+
+//      json = service.getToken(adminKeyId);
+      json = service.getToken("123456789");
+      token = extractToken(json);
+      if(token.length() != 0){
+        continue;
+      } else {
+        digitalWrite(denied, HIGH);
+        delay(1000);
+        digitalWrite(denied, LOW);
+        Serial.println("[LOG]: Not authorized access");
+        return;
+      }
     } else {
       key = keypad.getKey();
       
       if(key != NO_KEY) {
         if(key == '#')
-          break;
+          return;
   
         if(login.length() != 8) {
           login += key;
+          tone(2, 2062, 6);
           continue;
         }
   
-        if(password.length() != 6) {
+        if(password.length() != 4) {
           password += key;
+          tone(2, 2062, 6);
           continue;
         }
       } else {
@@ -241,4 +268,5 @@ void registerStudent() {
 
 void updateRF() {
   Serial.println("[LOG]: updateRF");
+  tone(2, 2062, 6);
 }

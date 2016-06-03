@@ -59,17 +59,15 @@ String Service::getToken(String key) {
     // Make a HTTP request:
     _client.println("POST /api/token/get-token/ HTTP/1.1");
     _client.println("Host: 162.243.249.102");
-    _client.println("User-Agent: arduino-ethernet");
-    _client.println("Connection: close");
     _client.println("Authorization: Basic Og==");
+    _client.println("User-Agent: arduino-ethernet");
+    _client.println("Accept: application/json");
+    _client.println("Content-Type: application/json");
     _client.println("Cache-Control: no-cache");
-    _client.println("Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW");
+    _client.println("Connection: close");
+    _client.println("Content-Length: 22");
     _client.println();
-    _client.println("----WebKitFormBoundary7MA4YWxkTrZu0gW");
-    _client.println("Content-Disposition: form-data; name=\"rfid\"");
-    _client.println();
-    _client.println(key);
-    _client.println("----WebKitFormBoundary7MA4YWxkTrZu0gW");
+    _client.println("{\"rfid\": \"" + key + "\"}");
     _client.println();
   } else {
     // if you didn't get a connection to the server:
