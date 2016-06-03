@@ -18,6 +18,7 @@ class Service
     void init(byte * mac, IPAddress server, IPAddress ip);
     String getRFAccess(String key);
     String getPWDAccess(String login, String password);
+    String getToken(String key);
   private:
     EthernetClient _client;
     IPAddress _server;

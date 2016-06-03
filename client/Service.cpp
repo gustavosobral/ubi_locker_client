@@ -8,16 +8,14 @@
 
 Service::Service(){};
 
-void Service::init(byte * mac, IPAddress server, IPAddress ip)
-{
+void Service::init(byte * mac, IPAddress server, IPAddress ip) {
   if (Ethernet.begin(mac) == 0) {
     Ethernet.begin(mac, ip);
   }
   _server = server;
 }
 
-String Service::getRFAccess(String key)
-{
+String Service::getRFAccess(String key) {
   // if you get a connection, report back via serial:
   if (_client.connect(_server, 80)) {
     // Make a HTTP request:
@@ -36,8 +34,7 @@ String Service::getRFAccess(String key)
   return handleResponse();
 }
 
-String Service::getPWDAccess(String login, String password) 
-{
+String Service::getPWDAccess(String login, String password) {
   // if you get a connection, report back via serial:
   if (_client.connect(_server, 80)) {
     // Make a HTTP request:
@@ -47,6 +44,32 @@ String Service::getPWDAccess(String login, String password)
     _client.println("Accept: application/json");
     _client.println("Content-Type: application/json");
     _client.println("Connection: close");
+    _client.println();
+  } else {
+    // if you didn't get a connection to the server:
+     Serial.println("connection failed");
+     return "";
+  }
+  return handleResponse();
+}
+
+String Service::getToken(String key) {
+  // if you get a connection, report back via serial:
+  if (_client.connect(_server, 80)) {
+    // Make a HTTP request:
+    _client.println("POST /api/token/get-token/ HTTP/1.1");
+    _client.println("Host: 162.243.249.102");
+    _client.println("User-Agent: arduino-ethernet");
+    _client.println("Connection: close");
+    _client.println("Authorization: Basic Og==");
+    _client.println("Cache-Control: no-cache");
+    _client.println("Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW");
+    _client.println();
+    _client.println("----WebKitFormBoundary7MA4YWxkTrZu0gW");
+    _client.println("Content-Disposition: form-data; name=\"rfid\"");
+    _client.println();
+    _client.println(key);
+    _client.println("----WebKitFormBoundary7MA4YWxkTrZu0gW");
     _client.println();
   } else {
     // if you didn't get a connection to the server:
@@ -82,7 +105,6 @@ String Service::handleResponse() {
       break;
     }
   }
-  
   inputString = inputString.substring(inputString.indexOf("{"), inputString.lastIndexOf("}")+1);
   return inputString;
 }
