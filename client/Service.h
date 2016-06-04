@@ -20,6 +20,7 @@ class Service
     String getPWDAccess(String login, String password);
     String getToken(String key);
     String postStudent(String token, String rfid, String password, String login);
+    String postRFID(String token, String rfid, String password, String login);
   private:
     EthernetClient _client;
     IPAddress _server;

@@ -102,6 +102,31 @@ String Service::postStudent(String token, String rfid, String password, String l
   return handleResponse();
 }
 
+String Service::postRFID(String token, String rfid, String password, String login) {
+  // if you get a connection, report back via serial:
+  if (_client.connect(_server, 80)) {
+    // Make a HTTP request:
+    _client.println("POST /api/persons/set-rfid/ HTTP/1.1");
+    _client.println("Host: 162.243.249.102");
+    _client.println("Authorization: Token " + token);
+    _client.println("User-Agent: arduino-ethernet");
+    _client.println("Accept: application/json");
+    _client.println("Content-Type: application/json");
+    _client.println("Cache-Control: no-cache");
+    _client.println("Connection: close");
+    _client.println("Content-Length: 69");
+    _client.println();
+    _client.println("{\"rfid\":\"" + rfid + "\", \"locker_pass\":\"" + password + "\", \"matriculation\":\"" + login + "\"}");
+    _client.println();
+  } else {
+    // if you didn't get a connection to the server:
+    Serial.println("connection failed");
+    return "";
+  }
+  Serial.println("[LOG] POST RFID request sent!");
+  return handleResponse();
+}
+
 String Service::handleResponse() {
   boolean stringComplete = false;
   String inputString = "";
