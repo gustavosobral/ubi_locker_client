@@ -208,9 +208,9 @@ void registerStudent() {
       }
       mfrc522.PICC_HaltA(); // Stop reading
 
-//      json = service.getToken(adminKeyId);
-      json = service.getToken("123456789");
+      json = service.getToken(adminKeyId);
       token = extractToken(json);
+      Serial.println("[LOG]: token = " + token);
       if(token.length() != 0){
         continue;
       } else {
@@ -260,10 +260,10 @@ void registerStudent() {
   }
 
   Serial.println("[LOG]: adminKeyId = " + adminKeyId);
-  Serial.println("[LOG]: token = " + token);
   Serial.println("[LOG]: login = " + login);
   Serial.println("[LOG]: password = " + password);
   Serial.println("[LOG]: keyId = " + keyId);
+  service.postStudent(token, keyId, password, login);
 }
 
 void updateRF() {
