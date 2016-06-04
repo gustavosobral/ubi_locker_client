@@ -1,4 +1,4 @@
-# ubi_locker_client
+# UbiLocker Client
 
 ## Components
 The following is a list of the main components used on this project:
