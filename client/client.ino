@@ -208,9 +208,9 @@ void registerStudent() {
       }
       mfrc522.PICC_HaltA(); // Stop reading
 
-//      json = service.getToken(adminKeyId);
-      json = service.getToken("123456789");
+      json = service.getToken(adminKeyId);
       token = extractToken(json);
+      Serial.println("[LOG]: token = " + token);
       if(token.length() != 0){
         continue;
       } else {
@@ -260,13 +260,100 @@ void registerStudent() {
   }
 
   Serial.println("[LOG]: adminKeyId = " + adminKeyId);
-  Serial.println("[LOG]: token = " + token);
   Serial.println("[LOG]: login = " + login);
   Serial.println("[LOG]: password = " + password);
   Serial.println("[LOG]: keyId = " + keyId);
+  service.postStudent(token, keyId, password, login);
 }
 
 void updateRF() {
   Serial.println("[LOG]: updateRF");
   tone(2, 2062, 6);
+
+  String login = "";
+  String password = "";
+  String adminKeyId = "";
+  String token = "";
+  keyId = "";
+
+  while(true) {
+    delay(200);
+
+    if(token.length() == 0) {
+      if(keypad.getKey() != NO_KEY)
+        break;
+  
+      // Look for new cards
+      if ( ! mfrc522.PICC_IsNewCardPresent()) {
+        continue;
+      }
+  
+      // Select one of the cards
+      if ( ! mfrc522.PICC_ReadCardSerial()) {
+        continue;
+      }
+  
+      for (byte i = 0; i < mfrc522.uid.size; i++) {
+        adminKeyId += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
+        adminKeyId += String(mfrc522.uid.uidByte[i], HEX);
+      }
+      mfrc522.PICC_HaltA(); // Stop reading
+
+      //  json = service.getToken(adminKeyId);
+      json = service.getToken("123456789");
+      token = extractToken(json);
+      Serial.println("[LOG]: token = " + token);
+      if(token.length() != 0){
+        continue;
+      } else {
+        digitalWrite(denied, HIGH);
+        delay(1000);
+        digitalWrite(denied, LOW);
+        Serial.println("[LOG]: Not authorized access");
+        return;
+      }
+    } else {
+      key = keypad.getKey();
+      
+      if(key != NO_KEY) {
+        if(key == '#')
+          return;
+  
+        if(login.length() != 8) {
+          login += key;
+          tone(2, 2062, 6);
+          continue;
+        }
+  
+        if(password.length() != 4) {
+          password += key;
+          tone(2, 2062, 6);
+          continue;
+        }
+      } else {
+        // Look for new cards
+        if ( ! mfrc522.PICC_IsNewCardPresent()) {
+          continue;
+        }
+    
+        // Select one of the cards
+        if ( ! mfrc522.PICC_ReadCardSerial()) {
+          continue;
+        }
+    
+        for (byte i = 0; i < mfrc522.uid.size; i++) {
+          keyId += mfrc522.uid.uidByte[i] < 0x10 ? "0" : "";
+          keyId += String(mfrc522.uid.uidByte[i], HEX);
+        }
+        mfrc522.PICC_HaltA(); // Stop reading
+        break;
+      }
+    }
+  }
+
+  Serial.println("[LOG]: adminKeyId = " + adminKeyId);
+  Serial.println("[LOG]: login = " + login);
+  Serial.println("[LOG]: password = " + password);
+  Serial.println("[LOG]: keyId = " + keyId);
+  service.postRFID(token, keyId, password, login);
 }
