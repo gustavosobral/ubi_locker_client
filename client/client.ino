@@ -6,7 +6,7 @@
 #include "Service.h"
 
 // RF-ID
-#define SS_PIN 9
+#define SS_PIN 53
 #define RST_PIN 8
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
@@ -28,8 +28,8 @@ byte colPins[COLS] = {A5, 6, 7}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 char key;
 
-int denied = 3;
-int allowed = 4;
+int denied = 11;
+int allowed = 12;
 String json = "";
 String keyId = "";
 boolean enabled = false;
@@ -208,7 +208,8 @@ void registerStudent() {
       }
       mfrc522.PICC_HaltA(); // Stop reading
 
-      json = service.getToken(adminKeyId);
+      // json = service.getToken(adminKeyId);
+      json = service.getToken("123456789");
       token = extractToken(json);
       Serial.println("[LOG]: token = " + token);
       if(token.length() != 0){
